@@ -93,20 +93,22 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   // (replace the code below)
   // make sure you comment it out when you add your own code -- otherwise e.g. you might integrate yaw twice
 
-//  float predictedPitch = pitchEst + dtIMU * gyro.y;
-//  float predictedRoll = rollEst + dtIMU * gyro.x;
-//  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+  //  float predictedPitch = pitchEst + dtIMU * gyro.y;
+  //  float predictedRoll = rollEst + dtIMU * gyro.x;
+  //  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
 
   // normalize yaw to -pi .. pi
-//  if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
-//  if (ekfState(6) < -F_PI) ekfState(6) += 2.f*F_PI;
+  //  if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
+  //  if (ekfState(6) < -F_PI) ekfState(6) += 2.f*F_PI;
 
-    Quaternion<float> quaternion = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, ekfState(6));
-    quaternion.IntegrateBodyRate(gyro, dtIMU);
+  Quaternion<float> quaternion = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, ekfState(6));
 
-    float predictedPitch = quaternion.Pitch();
-    float predictedRoll = quaternion.Roll();
-    ekfState(6) = quaternion.Yaw();	// yaw
+  quaternion.IntegrateBodyRate(gyro, dtIMU);
+
+  float predictedPitch = quaternion.Pitch();
+  float predictedRoll = quaternion.Roll();
+  ekfState(6) = quaternion.Yaw();	// yaw
+
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   // CALCULATE UPDATE
@@ -168,14 +170,14 @@ VectorXf QuadEstimatorEKF::PredictState(VectorXf curState, float dt, V3F accel, 
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
-    V3F accelWorld = attitude.Rotate_BtoI(accel);
+  V3F accelWorld = attitude.Rotate_BtoI(accel);
 
-    predictedState(0) += predictedState(3) * dt;
-    predictedState(1) += predictedState(4) * dt;
-    predictedState(2) += predictedState(5) * dt;
-    predictedState(3) += accelWorld.x * dt;
-    predictedState(4) += accelWorld.y * dt;
-    predictedState(5) += accelWorld.z * dt - CONST_GRAVITY * dt;
+  predictedState(0) += predictedState(3) * dt;
+  predictedState(1) += predictedState(4) * dt;
+  predictedState(2) += predictedState(5) * dt;
+  predictedState(3) += accelWorld.x * dt;
+  predictedState(4) += accelWorld.y * dt;
+  predictedState(5) += accelWorld.z * dt - CONST_GRAVITY * dt;
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
