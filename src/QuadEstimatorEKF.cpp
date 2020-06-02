@@ -85,7 +85,7 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   //  - there are several ways to go about this, including:
   //    1) create a rotation matrix based on your current Euler angles, integrate that, convert back to Euler angles
   //    OR 
-  //    2) use the Quaternion<float> class, which has a handy FromEuler123_RPY function for creating a quaternion from Euler Roll/PitchYaw
+  //    2) use the Quaternion<float> class, which has a handy FromEuler123_RPY ªfunction for creating a quaternion from Euler Roll/PitchYaw
   //       (Quaternion<float> also has a IntegrateBodyRate function, though this uses quaternions, not Euler angles)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
@@ -93,14 +93,20 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   // (replace the code below)
   // make sure you comment it out when you add your own code -- otherwise e.g. you might integrate yaw twice
 
-  float predictedPitch = pitchEst + dtIMU * gyro.y;
-  float predictedRoll = rollEst + dtIMU * gyro.x;
-  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+//  float predictedPitch = pitchEst + dtIMU * gyro.y;
+//  float predictedRoll = rollEst + dtIMU * gyro.x;
+//  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
 
   // normalize yaw to -pi .. pi
-  if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
-  if (ekfState(6) < -F_PI) ekfState(6) += 2.f*F_PI;
+//  if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
+//  if (ekfState(6) < -F_PI) ekfState(6) += 2.f*F_PI;
 
+    Quaternion<float> quaternion = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, ekfState(6));
+    quaternion.IntegrateBodyRate(gyro, dtIMU);
+
+    float predictedPitch = quaternion.Pitch();
+    float predictedRoll = quaternion.Roll();
+    ekfState(6) = quaternion.Yaw();	// yaw
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   // CALCULATE UPDATE
